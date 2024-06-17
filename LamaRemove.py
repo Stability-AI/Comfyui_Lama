@@ -28,11 +28,14 @@ def inpaint_img_with_lama(
         device="cuda"
 ):
     batch = {}
-    print(img.shape)
-    print(mask.shape)
     mask=mask*255
-    batch['image'] = img.permute(0,3, 1, 2)
-    batch['mask'] = mask[None, None]
+    batch['image'] = img.permute(0, 3, 1, 2)
+    if len(mask.shape) == 2:
+        batch['mask'] = mask[None, None]
+    elif len(mask.shape) == 3:
+        batch['mask'] = mask[None]
+    else:
+        raise ValueError(f"Mask shape {mask.shape} is not supported")
     unpad_to_size = [batch['image'].shape[2], batch['image'].shape[3]]
     batch['image'] = pad_tensor_to_modulo(batch['image'], mod)
     batch['mask'] = pad_tensor_to_modulo(batch['mask'], mod)
